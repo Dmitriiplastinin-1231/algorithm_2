@@ -45,7 +45,7 @@ class AntColonyGUI:
         control = ttk.Frame(self.root, padding=10)
         control.pack(side=tk.TOP, fill=tk.X)
 
-        self.file_var = tk.StringVar(value="berlin52.stp")
+        self.file_var = tk.StringVar(value="")
         self.iter_var = tk.StringVar(value="200")
         self.ants_var = tk.StringVar(value="50")
         self.alpha_var = tk.StringVar(value="1.0")

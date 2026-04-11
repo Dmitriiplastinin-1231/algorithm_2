@@ -50,7 +50,8 @@ class AntColonyTSP:
         for nxt, w in self.graph.adj[current]:
             if nxt not in unvisited:
                 continue
-            tau = self.pheromone.get(self._edge_key(current, nxt), self.MIN_PHEROMONE) ** self.alpha
+            edge_key = self._edge_key(current, nxt)
+            tau = self.pheromone.get(edge_key, AntColonyTSP.MIN_PHEROMONE) ** self.alpha
             eta = (1.0 / w) ** self.beta if w > 0 else 0.0
             p = tau * eta
             if p > 0:
@@ -99,7 +100,7 @@ class AntColonyTSP:
     def _evaporate(self):
         k = 1.0 - self.evaporation
         for edge in self.pheromone:
-            self.pheromone[edge] = max(self.MIN_PHEROMONE, self.pheromone[edge] * k)
+            self.pheromone[edge] = max(AntColonyTSP.MIN_PHEROMONE, self.pheromone[edge] * k)
 
     def _deposit(self, tour, length):
         if not tour or length <= 0:
@@ -107,7 +108,7 @@ class AntColonyTSP:
         delta = self.q / length
         for i in range(len(tour) - 1):
             edge = self._edge_key(tour[i], tour[i + 1])
-            self.pheromone[edge] = self.pheromone.get(edge, self.MIN_PHEROMONE) + delta
+            self.pheromone[edge] = self.pheromone.get(edge, AntColonyTSP.MIN_PHEROMONE) + delta
 
     def solve(self, iterations=200, callback=None, stop_condition=None):
         best_path = None
