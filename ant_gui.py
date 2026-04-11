@@ -328,8 +328,7 @@ class AntColonyGUI:
 
 def main():
     root = tk.Tk()
-    app = AntColonyGUI(root)
-    app.load_graph()
+    AntColonyGUI(root)
     root.mainloop()
 
 
