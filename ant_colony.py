@@ -25,7 +25,7 @@ class AntColonyTSP:
         self.ants = max(1, int(ants))
         self.alpha = float(alpha)
         self.beta = float(beta)
-        # Ограничиваем испарение ниже 1.0, чтобы феромон не обнулялся полностью за шаг.
+        # Ограничиваем испарение в диапазоне [0.0, 0.999], чтобы феромон не обнулялся полностью за шаг.
         self.evaporation = min(max(float(evaporation), 0.0), 0.999)
         self.q = float(q)
         self.random = random.Random(seed)

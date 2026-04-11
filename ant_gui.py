@@ -1,4 +1,5 @@
 import queue
+import random
 import threading
 import time
 import tkinter as tk
@@ -128,7 +129,7 @@ class AntColonyGUI:
                     G.add_edge(u, v, weight=w)
 
         if G.number_of_edges() > max_edges:
-            rnd = __import__("random").Random(seed)
+            rnd = random.Random(seed)
             sampled_edges = rnd.sample(list(G.edges()), max_edges)
             H = nx.Graph()
             H.add_nodes_from(G.nodes())
