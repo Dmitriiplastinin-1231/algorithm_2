@@ -75,8 +75,6 @@ def random_3opt_indices(n, rng):
         i = rng.randrange(0, n - 3)
         j = rng.randrange(i + 1, n - 2)
         k = rng.randrange(j + 1, n - 1)
-        if j <= i or k <= j:
-            continue
         if i == 0 and k == n - 1:
             continue
         return i, j, k
@@ -146,7 +144,7 @@ def calibrate_initial_temperature(g, route, rng, samples=400, target_acceptance=
 
     while len(uphill) < samples and attempts < max_attempts:
         attempts += 1
-        # propose_move only evaluates candidates and does not mutate route.
+        # Propose-only step: route remains unchanged until apply_move is called.
         move = propose_move(g, route, rng)
         if not move:
             continue
