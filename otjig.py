@@ -75,6 +75,10 @@ def random_3opt_indices(n, rng):
         i = rng.randrange(0, n - 3)
         j = rng.randrange(i + 1, n - 2)
         k = rng.randrange(j + 1, n - 1)
+        if j <= i or k <= j:
+            continue
+        if i == 0 and k == n - 1:
+            continue
         return i, j, k
     return None
 
@@ -142,6 +146,7 @@ def calibrate_initial_temperature(g, route, rng, samples=400, target_acceptance=
 
     while len(uphill) < samples and attempts < max_attempts:
         attempts += 1
+        # propose_move only evaluates candidates and does not mutate route.
         move = propose_move(g, route, rng)
         if not move:
             continue
@@ -218,30 +223,28 @@ def otjig(
 
         move = propose_move(g, current_route, rng)
         if move is None:
-            temperature *= temp_k
             no_improve += 1
-            continue
-
-        delta = move["delta"]
-        if delta <= 0:
-            accept = True
         else:
-            accept_prob = math.exp(-delta / temperature)
-            accept = rng.random() < accept_prob
+            delta = move["delta"]
+            if delta <= 0:
+                accept = True
+            else:
+                accept_prob = math.exp(-delta / temperature)
+                accept = rng.random() < accept_prob
 
-        if accept:
-            apply_move(current_route, move)
-            current_length += delta
-            total_accepted += 1
+            if accept:
+                apply_move(current_route, move)
+                current_length += delta
+                total_accepted += 1
 
-            if current_length < best_length:
-                best_length = current_length
-                best_route = current_route[:]
-                no_improve = 0
+                if current_length < best_length:
+                    best_length = current_length
+                    best_route = current_route[:]
+                    no_improve = 0
+                else:
+                    no_improve += 1
             else:
                 no_improve += 1
-        else:
-            no_improve += 1
 
         if reheat_no_improve > 0 and no_improve > 0 and no_improve % reheat_no_improve == 0:
             temperature = max(
@@ -250,6 +253,7 @@ def otjig(
             )
             current_route = best_route[:]
             current_length = best_length
+            no_improve = 0
 
         temperature *= temp_k
 
