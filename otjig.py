@@ -29,6 +29,15 @@ def nearest_neighbor_tour(graph, start):
     return tour
 
 
+def initial_hamiltonian_tour(graph, start_vertex):
+    cycle = graph.find_hamiltonian_cycle(
+        max_attempts=10000, timeout=5, method="random", start_vertex=start_vertex
+    )
+    if cycle is not None:
+        return cycle
+    return nearest_neighbor_tour(graph, start_vertex)
+
+
 def two_opt_delta(graph, tour, i, k):
     n = len(tour)
     a = tour[(i - 1) % n]
@@ -68,15 +77,8 @@ def simulated_annealing(graph, restarts=8, steps_per_restart=None, seed=42):
 
     for restart in range(restarts):
         start_vertex = starts[restart % len(starts)]
-        tour = nearest_neighbor_tour(graph, start_vertex)
+        tour = initial_hamiltonian_tour(graph, start_vertex)
         current_length = cycle_length(graph, tour)
-
-        random_tour = list(range(n))
-        random.shuffle(random_tour)
-        random_length = cycle_length(graph, random_tour)
-        if random_length < current_length:
-            tour = random_tour
-            current_length = random_length
 
         current_tour = tour[:]
         current_best_tour = tour[:]
@@ -114,17 +116,17 @@ def solve(file_name, restarts=8, steps_per_restart=None, seed=42):
     graph = Graph.load_from_stp(file_name)
     started = time.time()
 
-    nearest = nearest_neighbor_tour(graph, 0)
-    nearest_length = cycle_length(graph, nearest)
+    baseline_tour = initial_hamiltonian_tour(graph, 0)
+    baseline_length = cycle_length(graph, baseline_tour)
     best_tour, best_length = simulated_annealing(
         graph, restarts=restarts, steps_per_restart=steps_per_restart, seed=seed
     )
 
     elapsed = time.time() - started
     print(f"Файл: {file_name}")
-    print(f"Базовый nearest-neighbor: {nearest_length:.2f}")
+    print(f"Базовый гамильтонов цикл: {baseline_length:.2f}")
     print(f"После отжига:            {best_length:.2f}")
-    print(f"Улучшение:               {nearest_length - best_length:.2f}")
+    print(f"Улучшение:               {baseline_length - best_length:.2f}")
     print(f"Время:                   {elapsed:.3f} сек")
     return best_tour, best_length
 
