@@ -2,10 +2,17 @@ from graphClass import Graph
 import math
 import random
 
+def find_initial_cycle_greedy(g):
+    for start_vertex in range(g.num_nodes):
+        cycle = g.find_hamiltonian_cycle(method='nearest', start_vertex=start_vertex)
+        if cycle:
+            return cycle
+    return None
+
 g = Graph.load_from_stp("berlin52.stp")
 
-# Ищем гамильтонов цикл (случайный поиск, 100 попыток, таймаут 5 секунд)
-cycle = g.find_hamiltonian_cycle(max_attempts=10000, timeout=5, method='random')
+# Ищем гамильтонов цикл (жадный алгоритм ближайшего соседа)
+cycle = find_initial_cycle_greedy(g)
 if cycle:
     print(f"Найден цикл из {len(cycle)} вершин: {cycle[:10]}...")
     # Отображаем граф с выделенным циклом
@@ -24,7 +31,7 @@ def otjig(file_name, temp_k=0.98):
     
     
     g = Graph.load_from_stp(file_name)
-    cycle = g.find_hamiltonian_cycle(max_attempts=10000, timeout=5, method='random')
+    cycle = find_initial_cycle_greedy(g)
     if not cycle:
         print("Цикл не найден")
         return None
