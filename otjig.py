@@ -2,6 +2,14 @@ from graphClass import Graph
 import math
 import random
 
+MAX_2OPT_INDEX_RETRIES = 50
+MAX_3OPT_INDEX_RETRIES = 80
+MAX_MOVE_PROPOSALS = 100
+CALIBRATION_ATTEMPT_MULTIPLIER = 6
+MIN_CALIBRATION_ATTEMPTS = 1000
+MIN_TEMP_MULTIPLIER = 10.0
+MAX_REHEAT_MULTIPLIER = 3.0
+
 
 def find_initial_cycle_greedy(g):
     for start_vertex in range(g.num_nodes):
@@ -30,7 +38,7 @@ def _w(g, u, v):
 def random_2opt_indices(n, rng):
     if n < 4:
         return None
-    for _ in range(50):
+    for _ in range(MAX_2OPT_INDEX_RETRIES):
         i = rng.randrange(0, n - 1)
         j = rng.randrange(i + 1, n)
         if j == i + 1:
@@ -63,7 +71,7 @@ def apply_2opt(route, i, j):
 def random_3opt_indices(n, rng):
     if n < 6:
         return None
-    for _ in range(80):
+    for _ in range(MAX_3OPT_INDEX_RETRIES):
         i = rng.randrange(0, n - 3)
         j = rng.randrange(i + 1, n - 2)
         k = rng.randrange(j + 1, n - 1)
@@ -94,7 +102,7 @@ def apply_3opt(route, i, j, k):
 
 def propose_move(g, route, rng, p_3opt=0.35):
     use_3opt = rng.random() < p_3opt
-    for _ in range(100):
+    for _ in range(MAX_MOVE_PROPOSALS):
         if use_3opt:
             idx = random_3opt_indices(len(route), rng)
             if not idx:
@@ -130,7 +138,7 @@ def calibrate_initial_temperature(g, route, rng, samples=400, target_acceptance=
 
     uphill = []
     attempts = 0
-    max_attempts = max(samples * 6, 1000)
+    max_attempts = max(samples * CALIBRATION_ATTEMPT_MULTIPLIER, MIN_CALIBRATION_ATTEMPTS)
 
     while len(uphill) < samples and attempts < max_attempts:
         attempts += 1
@@ -195,7 +203,7 @@ def otjig(
         )
     temperature = float(initial_temperature)
     if temperature <= min_temperature:
-        temperature = min_temperature * 10.0
+        temperature = min_temperature * MIN_TEMP_MULTIPLIER
 
     no_improve = 0
     total_accepted = 0
@@ -236,7 +244,10 @@ def otjig(
             no_improve += 1
 
         if reheat_no_improve > 0 and no_improve > 0 and no_improve % reheat_no_improve == 0:
-            temperature = max(temperature, min(initial_temperature * reheat_factor, initial_temperature * 3.0))
+            temperature = max(
+                temperature,
+                min(initial_temperature * reheat_factor, initial_temperature * MAX_REHEAT_MULTIPLIER),
+            )
             current_route = best_route[:]
             current_length = best_length
 
