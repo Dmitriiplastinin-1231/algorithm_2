@@ -44,8 +44,7 @@ def two_opt_delta(graph, tour, i, k):
 
 
 def random_two_opt_indices(n):
-    i = random.randint(0, n - 2)
-    k = random.randint(i + 1, n - 1)
+    i, k = sorted(random.sample(range(n), 2))
     if i == 0 and k == n - 1:
         return None
     return i, k

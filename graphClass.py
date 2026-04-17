@@ -8,6 +8,7 @@ class Graph:
     def __init__(self, num_nodes):
         self.num_nodes = num_nodes
         self.adj = [[] for _ in range(num_nodes)]
+        # Быстрый доступ к весам рёбер: weights[u][v] -> weight (O(1))
         self.weights = [dict() for _ in range(num_nodes)]
 
     def add_edge(self, u, v, weight):
@@ -329,6 +330,5 @@ class Graph:
         if missing and not strict:
             print(f"Предупреждение: пропущены рёбра {missing}")
         return total
-
 
 
