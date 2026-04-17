@@ -1,7 +1,5 @@
 import sys
 from collections import deque
-import matplotlib.pyplot as plt
-import networkx as nx
 import random
 import time
 
@@ -10,21 +8,22 @@ class Graph:
     def __init__(self, num_nodes):
         self.num_nodes = num_nodes
         self.adj = [[] for _ in range(num_nodes)]
+        # Быстрый доступ к весам рёбер: weights[u][v] -> weight (O(1))
+        self.weights = [dict() for _ in range(num_nodes)]
 
     def add_edge(self, u, v, weight):
         if u < 0 or v < 0:
             raise ValueError(f"Номер вершины должен быть от 0 до {self.num_nodes-1}")
         self.adj[u].append((v, weight))
         self.adj[v].append((u, weight))
+        self.weights[u][v] = weight
+        self.weights[v][u] = weight
 
     def get_weight(self, u, v):
-        for neighbor, w in self.adj[u]:
-            if (neighbor == v):
-                return w
-        return None 
+        return self.weights[u].get(v)
 
     def neighbor(self, u):
-        return [v for v, _ in self.adj[u]]
+        return list(self.weights[u].keys())
 
     @staticmethod
     def load_from_stp(filename):
@@ -64,6 +63,12 @@ class Graph:
 
     def display(self, path=None, max_nodes=500, max_edges=5000, with_labels=False, 
             with_weights=False, figsize=(12, 8), seed=42):
+        try:
+            import matplotlib.pyplot as plt
+            import networkx as nx
+        except ImportError:
+            print("Для визуализации нужны matplotlib и networkx.")
+            return
     
         if self.num_nodes == 0:
             print("Граф пуст, нечего отображать.")
@@ -260,10 +265,7 @@ class Graph:
         """
         Проверяет, существует ли ребро (u, v).
         """
-        for neighbor, _ in self.adj[u]:
-            if neighbor == v:
-                return True
-        return False
+        return v in self.weights[u]
     def verify_path(self, path):
         if not path or len(path) < 2:
             return False, "Путь должен содержать хотя бы две вершины."
@@ -328,7 +330,5 @@ class Graph:
         if missing and not strict:
             print(f"Предупреждение: пропущены рёбра {missing}")
         return total
-
-
 
 
